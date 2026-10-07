@@ -4,7 +4,7 @@
 # route_table.tf). Map keyed by caller-chosen name so more than one VPC
 # can attach to this hub.
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
-  for_each = try(var.transit_gateway.vpc_attachments, {})
+  for_each = lookup(var.transit_gateway, "vpc_attachments", {})
 
   transit_gateway_id = aws_ec2_transit_gateway.this.id
   vpc_id             = each.value.vpc_id
@@ -25,7 +25,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 # VPC this account doesn't own. Only relevant when this module instance
 # is managing the *accepting* account's side of a shared transit gateway.
 resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
-  for_each = try(var.transit_gateway.vpc_attachment_accepters, {})
+  for_each = lookup(var.transit_gateway, "vpc_attachment_accepters", {})
 
   transit_gateway_attachment_id = each.value.transit_gateway_attachment_id
 

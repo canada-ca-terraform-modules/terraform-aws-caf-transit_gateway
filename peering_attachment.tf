@@ -2,7 +2,7 @@
 # gateway in another region (or another account), so VPCs attached to
 # either hub can reach each other. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
-  for_each = try(var.transit_gateway.peering_attachments, {})
+  for_each = lookup(var.transit_gateway, "peering_attachments", {})
 
   transit_gateway_id      = aws_ec2_transit_gateway.this.id
   peer_transit_gateway_id = each.value.peer_transit_gateway_id
@@ -23,7 +23,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 # peer account/region. Only relevant when this module instance is
 # managing the accepting side.
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
-  for_each = try(var.transit_gateway.peering_attachment_accepters, {})
+  for_each = lookup(var.transit_gateway, "peering_attachment_accepters", {})
 
   transit_gateway_attachment_id = each.value.transit_gateway_attachment_id
 

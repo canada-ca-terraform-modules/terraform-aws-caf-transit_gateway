@@ -10,7 +10,7 @@ A transit gateway hub is not scoped to a single VPC (see [Scope](#scope) in [`te
 
 ```hcl
 module "transit_gateway" {
-  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.0.0"
+  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.0.1"
   for_each = var.transit_gateways
 
   userDefinedString = each.key

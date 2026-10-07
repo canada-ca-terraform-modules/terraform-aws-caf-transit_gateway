@@ -48,7 +48,7 @@ locals {
 }
 
 module "transit_gateway" {
-  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.0.0"
+  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.0.1"
   for_each = local.transit_gateways
 
   userDefinedString = each.key

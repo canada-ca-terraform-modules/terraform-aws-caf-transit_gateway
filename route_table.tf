@@ -3,7 +3,7 @@
 # routing between attachments instead of everything sharing one flat
 # table. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  for_each = try(var.transit_gateway.route_tables, {})
+  for_each = lookup(var.transit_gateway, "route_tables", {})
 
   transit_gateway_id = aws_ec2_transit_gateway.this.id
 
@@ -20,7 +20,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 # Associates an attachment with a route table - which route table an
 # attachment's traffic is routed FROM. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
-  for_each = try(var.transit_gateway.route_table_associations, {})
+  for_each = lookup(var.transit_gateway, "route_table_associations", {})
 
   transit_gateway_attachment_id = try(
     aws_ec2_transit_gateway_vpc_attachment.this[each.value.attachment_key].id,
@@ -35,7 +35,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 # Propagates an attachment's routes INTO a route table. Map keyed by
 # caller-chosen name.
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = try(var.transit_gateway.route_table_propagations, {})
+  for_each = lookup(var.transit_gateway, "route_table_propagations", {})
 
   transit_gateway_attachment_id = try(
     aws_ec2_transit_gateway_vpc_attachment.this[each.value.attachment_key].id,
@@ -49,7 +49,7 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 # Static routes within a transit gateway route table - either forwarding
 # to an attachment or a blackhole (drop). Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_route" "this" {
-  for_each = try(var.transit_gateway.routes, {})
+  for_each = lookup(var.transit_gateway, "routes", {})
 
   transit_gateway_route_table_id = try(aws_ec2_transit_gateway_route_table.this[each.value.route_table_key].id, each.value.transit_gateway_route_table_id)
   destination_cidr_block         = each.value.destination_cidr_block
@@ -66,7 +66,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 # a set of CIDRs routed as one unit instead of one aws_ec2_transit_gateway_route
 # per CIDR. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_prefix_list_reference" "this" {
-  for_each = try(var.transit_gateway.prefix_list_references, {})
+  for_each = lookup(var.transit_gateway, "prefix_list_references", {})
 
   transit_gateway_route_table_id = try(aws_ec2_transit_gateway_route_table.this[each.value.route_table_key].id, each.value.transit_gateway_route_table_id)
   prefix_list_id                 = each.value.prefix_list_id
@@ -85,7 +85,7 @@ resource "aws_ec2_transit_gateway_prefix_list_reference" "this" {
 # default association route table so this map should hold at most one
 # entry.
 resource "aws_ec2_transit_gateway_default_route_table_association" "this" {
-  for_each = try(var.transit_gateway.default_route_table_associations, {})
+  for_each = lookup(var.transit_gateway, "default_route_table_associations", {})
 
   transit_gateway_id             = aws_ec2_transit_gateway.this.id
   transit_gateway_route_table_id = try(aws_ec2_transit_gateway_route_table.this[each.value.route_table_key].id, each.value.transit_gateway_route_table_id)
@@ -95,7 +95,7 @@ resource "aws_ec2_transit_gateway_default_route_table_association" "this" {
 # route tables above. Map keyed by caller-chosen name, same one-entry
 # expectation as the association resource.
 resource "aws_ec2_transit_gateway_default_route_table_propagation" "this" {
-  for_each = try(var.transit_gateway.default_route_table_propagations, {})
+  for_each = lookup(var.transit_gateway, "default_route_table_propagations", {})
 
   transit_gateway_id             = aws_ec2_transit_gateway.this.id
   transit_gateway_route_table_id = try(aws_ec2_transit_gateway_route_table.this[each.value.route_table_key].id, each.value.transit_gateway_route_table_id)

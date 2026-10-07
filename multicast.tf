@@ -4,7 +4,7 @@
 # var.transit_gateway.multicast_support = "enable" on the hub. Map keyed
 # by caller-chosen name.
 resource "aws_ec2_transit_gateway_multicast_domain" "this" {
-  for_each = try(var.transit_gateway.multicast_domains, {})
+  for_each = lookup(var.transit_gateway, "multicast_domains", {})
 
   transit_gateway_id = aws_ec2_transit_gateway.this.id
 
@@ -18,7 +18,7 @@ resource "aws_ec2_transit_gateway_multicast_domain" "this" {
 # Associates a subnet (via its attachment) with a multicast domain above.
 # Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_multicast_domain_association" "this" {
-  for_each = try(var.transit_gateway.multicast_domain_associations, {})
+  for_each = lookup(var.transit_gateway, "multicast_domain_associations", {})
 
   transit_gateway_multicast_domain_id = try(aws_ec2_transit_gateway_multicast_domain.this[each.value.multicast_domain_key].id, each.value.transit_gateway_multicast_domain_id)
   transit_gateway_attachment_id = try(
@@ -31,7 +31,7 @@ resource "aws_ec2_transit_gateway_multicast_domain_association" "this" {
 # Registers a network interface as a multicast group member (receiver) on
 # a domain above. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_multicast_group_member" "this" {
-  for_each = try(var.transit_gateway.multicast_group_members, {})
+  for_each = lookup(var.transit_gateway, "multicast_group_members", {})
 
   transit_gateway_multicast_domain_id = try(aws_ec2_transit_gateway_multicast_domain.this[each.value.multicast_domain_key].id, each.value.transit_gateway_multicast_domain_id)
   network_interface_id                = each.value.network_interface_id
@@ -41,7 +41,7 @@ resource "aws_ec2_transit_gateway_multicast_group_member" "this" {
 # Registers a network interface as a multicast group source (sender) on a
 # domain above. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_multicast_group_source" "this" {
-  for_each = try(var.transit_gateway.multicast_group_sources, {})
+  for_each = lookup(var.transit_gateway, "multicast_group_sources", {})
 
   transit_gateway_multicast_domain_id = try(aws_ec2_transit_gateway_multicast_domain.this[each.value.multicast_domain_key].id, each.value.transit_gateway_multicast_domain_id)
   network_interface_id                = each.value.network_interface_id
