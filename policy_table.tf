@@ -3,7 +3,7 @@
 # protocol, port) rather than destination CIDR alone. Map keyed by
 # caller-chosen name.
 resource "aws_ec2_transit_gateway_policy_table" "this" {
-  for_each = try(var.transit_gateway.policy_tables, {})
+  for_each = lookup(var.transit_gateway, "policy_tables", {})
 
   transit_gateway_id = aws_ec2_transit_gateway.this.id
 
@@ -13,7 +13,7 @@ resource "aws_ec2_transit_gateway_policy_table" "this" {
 # Associates an attachment with a policy table above. Map keyed by
 # caller-chosen name.
 resource "aws_ec2_transit_gateway_policy_table_association" "this" {
-  for_each = try(var.transit_gateway.policy_table_associations, {})
+  for_each = lookup(var.transit_gateway, "policy_table_associations", {})
 
   transit_gateway_attachment_id = try(
     aws_ec2_transit_gateway_vpc_attachment.this[each.value.attachment_key].id,

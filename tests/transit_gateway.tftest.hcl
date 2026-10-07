@@ -585,3 +585,22 @@ run "metering_policies" {
     error_message = "metering_policy_key must resolve to the matching metering policy id"
   }
 }
+
+# ---------------------------------------------------------------------------
+# unknown_values_at_plan
+# Regression: attachments whose vpc_id/subnet_ids are not known until apply
+# (VPC created in the same configuration) must still plan - for_each keys are
+# static, only the values are unknown.
+# ---------------------------------------------------------------------------
+run "unknown_values_at_plan" {
+  command = plan
+
+  module {
+    source = "./tests/unknown"
+  }
+
+  assert {
+    condition     = length(output.attachment_keys) == 1
+    error_message = "vpc_attachments with apply-time values must still produce one instance per static key"
+  }
+}

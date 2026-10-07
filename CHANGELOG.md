@@ -7,6 +7,17 @@ This file must be updated as part of every change to this module.
 
 ## [Unreleased]
 
+## [1.0.1]
+
+### Fixed
+
+- `for_each` on every optional resource used `try(var.transit_gateway.X, {})`,
+  which returns a wholly unknown value when any nested value is unknown at
+  plan time (e.g. `vpc_id` of a VPC created in the same configuration), so
+  the plan failed with "Invalid for_each argument". Replaced with
+  `lookup(var.transit_gateway, "X", {})`, which keeps the map keys known.
+  Added a regression test (`tests/unknown`).
+
 ### Added
 
 - Initial module: full parity with the `aws_ec2_transit_gateway*` resource

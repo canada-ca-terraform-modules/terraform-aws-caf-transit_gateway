@@ -9,7 +9,7 @@
 # raw attachment ID - typically this module's own
 # transit_gateway_vpc_attachment_ids output).
 resource "aws_ec2_transit_gateway_connect" "this" {
-  for_each = try(var.transit_gateway.connect_attachments, {})
+  for_each = lookup(var.transit_gateway, "connect_attachments", {})
 
   transit_gateway_id      = aws_ec2_transit_gateway.this.id
   transport_attachment_id = each.value.transport_attachment_id
@@ -24,7 +24,7 @@ resource "aws_ec2_transit_gateway_connect" "this" {
 # GRE peers for a Connect attachment above - keyed by caller-chosen name so
 # a single Connect attachment can have more than one peer.
 resource "aws_ec2_transit_gateway_connect_peer" "this" {
-  for_each = try(var.transit_gateway.connect_peers, {})
+  for_each = lookup(var.transit_gateway, "connect_peers", {})
 
   transit_gateway_attachment_id = try(
     aws_ec2_transit_gateway_connect.this[each.value.connect_attachment_key].id,

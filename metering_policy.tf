@@ -3,7 +3,7 @@
 # firewall appliance attachment), plus the rule entries within each
 # policy. Map keyed by caller-chosen name.
 resource "aws_ec2_transit_gateway_metering_policy" "this" {
-  for_each = try(var.transit_gateway.metering_policies, {})
+  for_each = lookup(var.transit_gateway, "metering_policies", {})
 
   transit_gateway_id       = aws_ec2_transit_gateway.this.id
   middlebox_attachment_ids = try(each.value.middlebox_attachment_ids, null)
@@ -14,7 +14,7 @@ resource "aws_ec2_transit_gateway_metering_policy" "this" {
 # Rule entries within a metering policy above. Map keyed by caller-chosen
 # name.
 resource "aws_ec2_transit_gateway_metering_policy_entry" "this" {
-  for_each = try(var.transit_gateway.metering_policy_entries, {})
+  for_each = lookup(var.transit_gateway, "metering_policy_entries", {})
 
   transit_gateway_metering_policy_id = try(aws_ec2_transit_gateway_metering_policy.this[each.value.metering_policy_key].transit_gateway_metering_policy_id, each.value.transit_gateway_metering_policy_id)
   policy_rule_number                 = each.value.policy_rule_number
