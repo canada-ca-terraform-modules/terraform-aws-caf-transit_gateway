@@ -28,15 +28,15 @@ module "transit_gateway" {
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.68.0 |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.0 |
 
 ## Modules
 
@@ -45,7 +45,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_ec2_transit_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway) | resource |
 | [aws_ec2_transit_gateway_connect.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_connect) | resource |
 | [aws_ec2_transit_gateway_connect_peer.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_connect_peer) | resource |
@@ -72,7 +72,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_env"></a> [env](#input\_env) | (Required) env value used in name generation | `string` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Optional map of VPC key to a map of subnet key to its ID. Resolves a vpc\_attachments entry's subnet\_keys within that entry's vpc\_key, e.g. { for k, v in module.vpc : k => v.subnet\_ids }. | `map(map(string))` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all resources (merged with transit\_gateway.tags) | `map(string)` | `{}` | no |
@@ -83,7 +83,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | Returns the ARN of the transit gateway hub |
 | <a name="output_association_default_route_table_id"></a> [association\_default\_route\_table\_id](#output\_association\_default\_route\_table\_id) | Returns the ID of the transit gateway's default association route table |
 | <a name="output_connect_attachment_ids"></a> [connect\_attachment\_ids](#output\_connect\_attachment\_ids) | Returns the IDs of Connect (GRE) attachments, keyed by the caller's chosen name |
