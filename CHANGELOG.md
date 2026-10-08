@@ -7,6 +7,23 @@ This file must be updated as part of every change to this module.
 
 ## [Unreleased]
 
+## [1.1.0]
+
+### Added
+
+- `vpc_ids` and `subnet_ids` inputs. A `vpc_attachments` entry can now set
+  `vpc_key` and `subnet_keys` instead of a literal `vpc_id`/`subnet_ids`; the
+  module resolves them through `vpc_ids` (VPC key to ID) and `subnet_ids`
+  (VPC key to subnet key to ID), so callers pass `each.value` straight
+  through. Subnet keys are scoped to their VPC. An unknown key fails the
+  plan with a precondition message. The literal form is unchanged.
+
+### Changed
+
+- `ESLZ/transit_gateway.tf` no longer resolves keys itself and its
+  `subnet_ids` variable is now `map(map(string))` (VPC key to subnet key to
+  ID) instead of a flat map.
+
 ## [1.0.1]
 
 ### Fixed

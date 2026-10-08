@@ -19,3 +19,15 @@ variable "transit_gateway" {
   type        = any
   default     = {}
 }
+
+variable "vpc_ids" {
+  description = "Optional map of VPC key to its ID. Resolves a vpc_attachments entry's vpc_key, e.g. { for k, v in module.vpc : k => v.id }."
+  type        = map(string)
+  default     = {}
+}
+
+variable "subnet_ids" {
+  description = "Optional map of VPC key to a map of subnet key to its ID. Resolves a vpc_attachments entry's subnet_keys within that entry's vpc_key, e.g. { for k, v in module.vpc : k => v.subnet_ids }."
+  type        = map(map(string))
+  default     = {}
+}

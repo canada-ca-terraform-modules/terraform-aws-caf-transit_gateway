@@ -27,3 +27,24 @@ module "tgw" {
 output "attachment_keys" {
   value = keys(module.tgw.vpc_attachment_ids)
 }
+
+# Same, but the IDs reach the module through vpc_ids/subnet_ids and are resolved by vpc_key/subnet_keys.
+module "tgw_keyed" {
+  source = "../.."
+
+  env               = "Dev"
+  userDefinedString = "keyed"
+
+  vpc_ids    = { core = aws_vpc.this.id }
+  subnet_ids = { core = { tgw-1a = aws_subnet.this.id } }
+
+  transit_gateway = {
+    vpc_attachments = {
+      spoke_a = { vpc_key = "core", subnet_keys = ["tgw-1a"] }
+    }
+  }
+}
+
+output "keyed_attachment_keys" {
+  value = keys(module.tgw_keyed.vpc_attachment_ids)
+}

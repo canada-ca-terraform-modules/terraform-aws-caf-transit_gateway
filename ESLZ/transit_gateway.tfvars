@@ -13,9 +13,9 @@ transit_gateways = {
     # --- vpc_attachments: connects a VPC to this hub (the "connect a VPC to another VPC" feature) ---
     vpc_attachments = {
       spoke_a = {
-        vpc_key = "spoke-a" # Optional: config-name from terraform-aws-caf-vpc's ESLZ variable, resolved via ESLZ/transit_gateway.tf's vpc_ids
+        vpc_key = "spoke-a" # Optional: config-name from terraform-aws-caf-vpc's ESLZ variable, resolved via the module's vpc_ids
         # vpc_id    = "vpc-0123456789abcdef0" # Optional: literal VPC ID instead of vpc_key
-        subnet_keys = ["spoke-a-subnet1"] # Optional: config-name(s) from terraform-aws-caf-subnet's ESLZ variable, resolved via subnet_ids
+        subnet_keys = ["spoke-a-subnet1"] # Optional: subnet config-name(s) under vpc_key, resolved via the module's subnet_ids
         # subnet_ids = ["subnet-0123456789abcdef0"] # Optional: literal subnet ID(s) instead of subnet_keys
         # appliance_mode_support                          = "enable"
         # dns_support                                     = "enable"

@@ -10,17 +10,19 @@ A transit gateway hub is not scoped to a single VPC (see [Scope](#scope) in [`te
 
 ```hcl
 module "transit_gateway" {
-  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.0.1"
+  source   = "github.com/canada-ca-terraform-modules/terraform-aws-caf-transit_gateway.git?ref=v1.1.0"
   for_each = var.transit_gateways
 
   userDefinedString = each.key
   env               = var.env
+  vpc_ids           = var.vpc_ids
+  subnet_ids        = var.subnet_ids
   transit_gateway   = each.value
   tags              = var.tags
 }
 ```
 
-`vpc_attachments` entries take either a literal `vpc_id`/`subnet_ids`, or a `vpc_key`/`subnet_keys` resolved against the `vpc_ids`/`subnet_ids` maps (config-names from the `terraform-aws-caf-vpc`/`terraform-aws-caf-subnet` modules' own ESLZ variables) - see [`ESLZ/transit_gateway.tf`](ESLZ/transit_gateway.tf) for the resolution logic and [`ESLZ/transit_gateway.tfvars`](ESLZ/transit_gateway.tfvars) for the full set of `transit_gateway` object parameters.
+`vpc_attachments` entries take either a literal `vpc_id`/`subnet_ids`, or a `vpc_key`/`subnet_keys` resolved inside the module against the `vpc_ids` (VPC key to ID) and `subnet_ids` (VPC key to subnet key to ID) inputs, e.g. `vpc_ids = { for k, v in module.vpc : k => v.id }` and `subnet_ids = { for k, v in module.vpc : k => v.subnet_ids }`. Subnet keys are scoped to their VPC, so two VPCs can both have a `tgw-1a`. An unknown `vpc_key` or `subnet_keys` entry fails the plan with a clear message. See [`ESLZ/transit_gateway.tfvars`](ESLZ/transit_gateway.tfvars) for the full set of `transit_gateway` object parameters.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -72,9 +74,11 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_env"></a> [env](#input\_env) | (Required) env value used in name generation | `string` | n/a | yes |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Optional map of VPC key to a map of subnet key to its ID. Resolves a vpc\_attachments entry's subnet\_keys within that entry's vpc\_key, e.g. { for k, v in module.vpc : k => v.subnet\_ids }. | `map(map(string))` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all resources (merged with transit\_gateway.tags) | `map(string)` | `{}` | no |
 | <a name="input_transit_gateway"></a> [transit\_gateway](#input\_transit\_gateway) | (Required) Object describing the transit gateway and every attachment/route/association hung off it (see TFVars Parameters below). Optional `name` key overrides the auto-derived "env-userDefinedString" Name tag value. | `any` | `{}` | no |
 | <a name="input_userDefinedString"></a> [userDefinedString](#input\_userDefinedString) | (Required) UserDefinedString part of the name of the transit gateway | `string` | n/a | yes |
+| <a name="input_vpc_ids"></a> [vpc\_ids](#input\_vpc\_ids) | Optional map of VPC key to its ID. Resolves a vpc\_attachments entry's vpc\_key, e.g. { for k, v in module.vpc : k => v.id }. | `map(string)` | `{}` | no |
 
 ## Outputs
 
@@ -121,7 +125,7 @@ The `transit_gateway` object variable (top-level keys are the hub's own argument
 | `vpn_ecmp_support` | string | `"enable"` | `enable`/`disable`. |
 | `timeouts` | object | `null` | `{ create, update, delete }` duration strings. |
 | `tags` | map(string) | `{}` | Tags for the hub resource. |
-| `vpc_attachments` | map(object) | `{}` | `{ vpc_id (required, or vpc_key via ESLZ), subnet_ids (required, or subnet_keys via ESLZ), appliance_mode_support, dns_support, ipv6_support, security_group_referencing_support, transit_gateway_default_route_table_association, transit_gateway_default_route_table_propagation, tags }`. |
+| `vpc_attachments` | map(object) | `{}` | `{ vpc_id (required, or vpc_key), subnet_ids (required, or subnet_keys under that vpc_key), appliance_mode_support, dns_support, ipv6_support, security_group_referencing_support, transit_gateway_default_route_table_association, transit_gateway_default_route_table_propagation, tags }`. |
 | `vpc_attachment_accepters` | map(object) | `{}` | `{ transit_gateway_attachment_id (required), transit_gateway_default_route_table_association, transit_gateway_default_route_table_propagation, tags }`. |
 | `peering_attachments` | map(object) | `{}` | `{ peer_transit_gateway_id (required), peer_region (required), peer_account_id, options { dynamic_routing }, tags }`. |
 | `peering_attachment_accepters` | map(object) | `{}` | `{ transit_gateway_attachment_id (required), tags }`. |

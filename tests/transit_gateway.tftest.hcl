@@ -286,6 +286,82 @@ run "vpc_attachments" {
 }
 
 # ---------------------------------------------------------------------------
+# vpc_attachments_resolve_keys
+# vpc_key/subnet_keys resolve through var.vpc_ids/var.subnet_ids; the same
+# subnet key under two VPCs resolves to each VPC's own subnet.
+# ---------------------------------------------------------------------------
+run "vpc_attachments_resolve_keys" {
+  command = plan
+
+  variables {
+    vpc_ids = {
+      core  = "vpc-0123456789abcdef0"
+      perim = "vpc-0fedcba9876543210"
+    }
+    subnet_ids = {
+      core  = { tgw-1a = "subnet-0aaaaaaaaaaaaaaaa", tgw-1b = "subnet-0bbbbbbbbbbbbbbbb" }
+      perim = { tgw-1a = "subnet-0cccccccccccccccc" }
+    }
+    transit_gateway = {
+      vpc_attachments = {
+        core  = { vpc_key = "core", subnet_keys = ["tgw-1a", "tgw-1b"] }
+        perim = { vpc_key = "perim", subnet_keys = ["tgw-1a"], appliance_mode_support = "enable" }
+        other = { vpc_id = "vpc-0999999999999999", subnet_ids = ["subnet-0999999999999999"] }
+      }
+    }
+  }
+
+  assert {
+    condition     = length(aws_ec2_transit_gateway_vpc_attachment.this) == 3
+    error_message = "one attachment per entry, whether keyed or literal"
+  }
+  assert {
+    condition     = aws_ec2_transit_gateway_vpc_attachment.this["core"].vpc_id == "vpc-0123456789abcdef0" && aws_ec2_transit_gateway_vpc_attachment.this["perim"].vpc_id == "vpc-0fedcba9876543210"
+    error_message = "vpc_key must resolve through var.vpc_ids"
+  }
+  assert {
+    condition     = toset(aws_ec2_transit_gateway_vpc_attachment.this["core"].subnet_ids) == toset(["subnet-0aaaaaaaaaaaaaaaa", "subnet-0bbbbbbbbbbbbbbbb"]) && toset(aws_ec2_transit_gateway_vpc_attachment.this["perim"].subnet_ids) == toset(["subnet-0cccccccccccccccc"])
+    error_message = "subnet_keys must resolve within the entry's own vpc_key"
+  }
+  assert {
+    condition     = aws_ec2_transit_gateway_vpc_attachment.this["other"].vpc_id == "vpc-0999999999999999"
+    error_message = "literal vpc_id/subnet_ids must still work alongside keyed entries"
+  }
+}
+
+run "vpc_attachments_unknown_vpc_key" {
+  command = plan
+
+  variables {
+    vpc_ids    = { core = "vpc-0123456789abcdef0" }
+    subnet_ids = { core = { tgw-1a = "subnet-0aaaaaaaaaaaaaaaa" } }
+    transit_gateway = {
+      vpc_attachments = {
+        bad = { vpc_key = "missing", subnet_keys = ["tgw-1a"] }
+      }
+    }
+  }
+
+  expect_failures = [aws_ec2_transit_gateway_vpc_attachment.this]
+}
+
+run "vpc_attachments_unknown_subnet_key" {
+  command = plan
+
+  variables {
+    vpc_ids    = { core = "vpc-0123456789abcdef0" }
+    subnet_ids = { core = { tgw-1a = "subnet-0aaaaaaaaaaaaaaaa" } }
+    transit_gateway = {
+      vpc_attachments = {
+        bad = { vpc_key = "core", subnet_keys = ["tgw-1z"] }
+      }
+    }
+  }
+
+  expect_failures = [aws_ec2_transit_gateway_vpc_attachment.this]
+}
+
+# ---------------------------------------------------------------------------
 # peering_attachments
 # ---------------------------------------------------------------------------
 run "peering_attachments" {
@@ -600,7 +676,7 @@ run "unknown_values_at_plan" {
   }
 
   assert {
-    condition     = length(output.attachment_keys) == 1
+    condition     = length(output.attachment_keys) == 1 && length(output.keyed_attachment_keys) == 1
     error_message = "vpc_attachments with apply-time values must still produce one instance per static key"
   }
 }
